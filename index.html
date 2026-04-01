@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loginter — Transportes Internacionais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #050608;
+  --deep: #0a0c10;
+  --surface: rgba(255,255,255,0.04);
+  --glass: rgba(255,255,255,0.07);
+  --glass-border: rgba(255,255,255,0.12);
+  --orange: #F97316;
+  --amber: #FBBF24;
+  --orange-glow: rgba(249,115,22,0.3);
+  --text: #F1F5F9;
+  --muted: #94A3B8;
+  --radius: 20px;
+  --radius-sm: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--black);
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.5;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--deep); }
+::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 3px; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  padding: 16px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(5,6,8,0.75);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(249,115,22,0.15);
+  transition: all 0.3s;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--orange), var(--amber));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.nav-logo-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #fff 60%, var(--amber));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.nav-logo-sub {
+  font-size: 9px; letter-spacing: 3px; color: var(--muted);
+  font-weight: 500; text-transform: uppercase;
+  margin-top: -4px;
+}
+nav ul {
+  display: flex; gap: 32px; list-style: none;
+}
+nav ul a {
+  color: var(--muted); text-decoration: none;
+  font-size: 14px; font-weight: 500; letter-spacing: 0.5px;
+  transition: color 0.2s;
+  position: relative;
+}
+nav ul a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 2px;
+  background: var(--orange);
+  border-radius: 1px; transition: width 0.3s;
+}
+nav ul a:hover { color: var(--text); }
+nav ul a:hover::after { width: 100%; }
+.nav-btn {
+  background: linear-gradient(135deg, var(--orange), #ea580c);
+  color: white; border: none; padding: 10px 24px;
+  border-radius: 50px; font-size: 13px; font-weight: 600;
+  cursor: pointer; letter-spacing: 0.5px;
+  transition: all 0.2s; box-shadow: 0 0 20px var(--orange-glow);
+}
+.nav-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 30px var(--orange-glow); }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex; align-items: center;
+  padding: 0 48px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 50%, rgba(249,115,22,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 20% 80%, rgba(251,191,36,0.06) 0%, transparent 60%),
+    linear-gradient(180deg, var(--black) 0%, var(--deep) 100%);
+}
+
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(249,115,22,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249,115,22,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+.hero-content {
+  position: relative; z-index: 2;
+  max-width: 680px;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(249,115,22,0.12);
+  border: 1px solid rgba(249,115,22,0.25);
+  border-radius: 50px;
+  padding: 6px 16px;
+  font-size: 12px; font-weight: 600; letter-spacing: 2px;
+  color: var(--amber); text-transform: uppercase;
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease both;
+}
+.hero-badge span { display: inline-block; width: 6px; height: 6px; background: var(--amber); border-radius: 50%; animation: pulse 2s infinite; }
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(56px, 8vw, 96px);
+  line-height: 0.95;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero-title em {
+  font-style: normal;
+  background: linear-gradient(90deg, var(--orange), var(--amber));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  font-size: 17px; line-height: 1.7; color: var(--muted);
+  max-width: 500px; margin-bottom: 40px;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.hero-ctas {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--orange), #ea580c);
+  color: white; border: none; padding: 16px 36px;
+  border-radius: 50px; font-size: 15px; font-weight: 600;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 0 30px rgba(249,115,22,0.4);
+  transition: all 0.25s;
+  text-decoration: none; display: inline-block;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(249,115,22,0.5); }
+.btn-ghost {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  color: var(--text); padding: 16px 36px;
+  border-radius: 50px; font-size: 15px; font-weight: 500;
+  cursor: pointer; letter-spacing: 0.5px;
+  transition: all 0.25s; text-decoration: none; display: inline-block;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+.hero-visual {
+  position: absolute; right: -60px; top: 50%; transform: translateY(-50%);
+  width: 55%; opacity: 0.15;
+  animation: fadeUp 0.8s 0.4s ease both;
+}
+.hero-visual svg { width: 100%; }
+
+.hero-flags {
+  position: absolute; bottom: 48px; left: 48px; z-index: 2;
+  display: flex; gap: 12px; align-items: center;
+  animation: fadeUp 0.6s 0.5s ease both;
+}
+.flag-chip {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  border-radius: 50px; padding: 6px 16px;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; color: var(--muted);
+  white-space: nowrap;
+}
+.flag-chip.active { border-color: rgba(249,115,22,0.4); color: var(--amber); }
+
+/* ── STATS ── */
+#stats {
+  padding: 80px 48px;
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 20px;
+  position: relative;
+}
+#stats::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(249,115,22,0.03), transparent);
+}
+.stat-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  text-align: center;
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.stat-card:hover { transform: translateY(-4px); border-color: rgba(249,115,22,0.3); }
+.stat-card:hover::before { opacity: 1; }
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 56px; line-height: 1;
+  background: linear-gradient(135deg, var(--orange), var(--amber));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.stat-label {
+  font-size: 13px; font-weight: 500; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* ── SECTION HEADER ── */
+.section-header {
+  text-align: center; margin-bottom: 60px;
+}
+.section-tag {
+  display: inline-block;
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--orange);
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 5vw, 64px);
+  letter-spacing: 2px; line-height: 1;
+  margin-bottom: 16px;
+}
+.section-sub {
+  font-size: 16px; color: var(--muted);
+  max-width: 520px; margin: 0 auto; line-height: 1.7;
+}
+
+/* ── SERVICES TABS ── */
+#servicos { padding: 100px 48px; }
+
+.tabs-nav {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 50px;
+}
+.tab-btn {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  border-radius: 50px; padding: 10px 24px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+  color: var(--muted); cursor: pointer;
+  transition: all 0.25s;
+}
+.tab-btn.active, .tab-btn:hover {
+  background: linear-gradient(135deg, var(--orange), #ea580c);
+  border-color: transparent; color: white;
+  box-shadow: 0 4px 20px var(--orange-glow);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; animation: fadeUp 0.4s ease; }
+
+.service-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+  cursor: default;
+}
+.service-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(249,115,22,0.06), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.service-card:hover { transform: translateY(-6px); border-color: rgba(249,115,22,0.3); }
+.service-card:hover::after { opacity: 1; }
+.service-icon {
+  width: 52px; height: 52px;
+  background: rgba(249,115,22,0.12);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin-bottom: 20px;
+}
+.service-card h3 {
+  font-size: 18px; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.3px;
+}
+.service-card p { font-size: 14px; line-height: 1.7; color: var(--muted); }
+
+/* ── PAISES CARROSSEL ── */
+#paises { padding: 80px 0; overflow: hidden; }
+.countries-track {
+  display: flex; gap: 16px;
+  animation: scroll 30s linear infinite;
+  width: max-content;
+}
+.country-pill {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px; padding: 12px 28px;
+  font-size: 14px; font-weight: 600; letter-spacing: 1px;
+  white-space: nowrap; color: var(--text);
+  display: flex; align-items: center; gap: 10px;
+}
+.country-pill span { font-size: 20px; }
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── DEPOIMENTOS ── */
+#depoimentos { padding: 100px 48px; }
+
+.testimonials-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 24px;
+}
+.testimonial {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  position: relative;
+  transition: all 0.3s;
+}
+.testimonial:hover { border-color: rgba(249,115,22,0.3); transform: translateY(-4px); }
+.testimonial::before {
+  content: '"';
+  position: absolute; top: 20px; right: 28px;
+  font-size: 80px; line-height: 1;
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--orange); opacity: 0.15;
+}
+.stars { display: flex; gap: 4px; margin-bottom: 16px; }
+.stars span { color: var(--amber); font-size: 16px; }
+.testimonial-text {
+  font-size: 15px; line-height: 1.75; color: var(--muted);
+  margin-bottom: 28px; font-style: italic;
+}
+.testimonial-author {
+  display: flex; align-items: center; gap: 14px;
+}
+.author-avatar {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--orange), var(--amber));
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.author-name { font-weight: 700; font-size: 15px; }
+.author-company { font-size: 12px; color: var(--orange); font-weight: 500; }
+
+/* ── CONTATO ── */
+#contato { padding: 100px 48px; }
+
+.contact-grid {
+  display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: start;
+}
+.contact-info h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px; letter-spacing: 2px; margin-bottom: 20px; line-height: 1;
+}
+.contact-info p { color: var(--muted); font-size: 16px; line-height: 1.7; margin-bottom: 40px; }
+
+.contact-detail {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+}
+.contact-detail-icon {
+  width: 44px; height: 44px;
+  background: rgba(249,115,22,0.1);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  flex-shrink: 0;
+}
+.contact-detail-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.contact-detail-value { font-size: 14px; font-weight: 500; }
+
+.contact-form-wrap {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius);
+  padding: 40px;
+}
+.contact-form-wrap h3 {
+  font-size: 22px; font-weight: 700; margin-bottom: 8px;
+}
+.contact-form-wrap p {
+  font-size: 14px; color: var(--muted); margin-bottom: 28px;
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block; font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 14px; color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
+}
+.form-group select option { background: #1a1d24; color: var(--text); }
+.form-group textarea { resize: vertical; min-height: 120px; }
+
+.form-channels {
+  display: flex; gap: 12px; margin-bottom: 20px;
+}
+.channel-check {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted);
+}
+.channel-check input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: var(--orange;
+  cursor: pointer;
+}
+
+.form-success {
+  display: none;
+  text-align: center; padding: 32px;
+}
+.form-success .success-icon {
+  font-size: 48px; margin-bottom: 16px;
+}
+.form-success h4 { font-size: 22px; margin-bottom: 8px; }
+.form-success p { color: var(--muted); font-size: 14px; }
+
+/* ── LOGIN MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(5,6,8,0.85); backdrop-filter: blur(12px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+.modal {
+  background: #0f1117;
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 48px 40px;
+  width: 100%; max-width: 420px;
+  position: relative;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+  animation: slideUp 0.3s ease;
+}
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 50%; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; color: var(--muted);
+  transition: all 0.2s;
+}
+.modal-close:hover { color: var(--text); }
+.modal-logo {
+  text-align: center; margin-bottom: 32px;
+}
+.modal-logo-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--orange), var(--amber));
+  border-radius: 16px; font-size: 28px; margin-bottom: 12px;
+}
+.modal-logo p { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; }
+.modal-logo small { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+.modal h2 { font-size: 24px; font-weight: 700; margin-bottom: 6px; text-align: center; }
+.modal .modal-sub { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 28px; }
+
+.modal-view { display: none; }
+.modal-view.active { display: block; }
+
+.social-btn {
+  width: 100%;
+  background: white; color: #1a1a1a;
+  border: none; border-radius: var(--radius-sm);
+  padding: 13px 20px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 20px;
+}
+.social-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(255,255,255,0.1); }
+.social-btn svg { width: 18px; height: 18px; }
+.divider {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--glass-border);
+}
+.divider span { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+.modal .form-group { margin-bottom: 14px; }
+.modal .form-group input {
+  background: rgba(255,255,255,0.06);
+}
+
+.modal-link {
+  background: none; border: none; color: var(--orange);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  padding: 0; text-decoration: underline; transition: color 0.2s;
+}
+.modal-link:hover { color: var(--amber); }
+.forgot-row { text-align: right; margin-top: -8px; margin-bottom: 16px; }
+
+.modal .btn-primary { width: 100%; text-align: center; border: none; font-family: 'Outfit', sans-serif; font-size: 15px; }
+
+.modal-footer {
+  margin-top: 20px; text-align: center;
+  font-size: 13px; color: var(--muted);
+}
+.admin-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 50px; padding: 4px 12px;
+  font-size: 11px; font-weight: 600; color: var(--orange);
+  letter-spacing: 1px; margin-top: 12px;
+}
+
+/* ── FOOTER ── */
+footer {
+  padding: 60px 48px 30px;
+  border-top: 1px solid var(--glass-border);
+  background: var(--deep);
+}
+.footer-grid {
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 40px;
+  margin-bottom: 48px;
+}
+.footer-brand p { color: var(--muted); font-size: 14px; line-height: 1.7; margin-top: 16px; max-width: 280px; }
+.footer-col h4 {
+  font-size: 13px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--orange); margin-bottom: 20px;
+}
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 10px; }
+.footer-col ul a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+.footer-col ul a:hover { color: var(--text); }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 24px; border-top: 1px solid var(--glass-border);
+  font-size: 13px; color: var(--muted);
+}
+.mercosul-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 8px; padding: 6px 14px;
+  font-size: 12px; font-weight: 700; color: var(--amber); letter-spacing: 1px;
+}
+
+/* ── WHATSAPP FLOAT ── */
+.wa-float {
+  position: fixed; bottom: 28px; right: 28px; z-index: 990;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.wa-tooltip {
+  background: var(--glass); backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px; padding: 10px 16px;
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap;
+  opacity: 0; transform: translateX(10px);
+  transition: all 0.25s; pointer-events: none;
+}
+.wa-float:hover .wa-tooltip {
+  opacity: 1; transform: translateX(0);
+}
+.wa-btn {
+  width: 60px; height: 60px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; text-decoration: none;
+  box-shadow: 0 4px 24px rgba(37,211,102,0.4);
+  animation: bounce 3s ease infinite;
+  transition: transform 0.2s;
+}
+.wa-btn:hover { transform: scale(1.1); }
+.wa-btn svg { width: 30px; height: 30px; fill: white; }
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav ul { display: none; }
+  #stats { grid-template-columns: repeat(2,1fr); }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .tab-content.active { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  #hero { padding: 120px 24px 80px; }
+  #stats, #servicos, #depoimentos, #contato, footer { padding-left: 24px; padding-right: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">🐆</div>
+    <div>
+      <div class="nav-logo-text">LOGINTER</div>
+      <div class="nav-logo-sub">Transportes Internacionais</div>
+    </div>
+  </div>
+  <ul>
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#paises">Destinos</a></li>
+    <li><a href="#depoimentos">Depoimentos</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <button class="nav-btn" onclick="openModal()">🔒 Área Admin</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span></span>
+      Especialista Mercosul · +20 Anos
+    </div>
+    <h1 class="hero-title">
+      Frete<br>
+      <em>Internacional</em><br>
+      sem Fronteiras
+    </h1>
+    <p class="hero-sub">
+      Conectamos o Brasil à América do Sul com soluções de transporte terrestre, multimodal e porta a porta. 55.430+ entregas realizadas. 10+ países atendidos.
+    </p>
+    <div class="hero-ctas">
+      <a href="#contato" class="btn-primary">💬 Solicitar Cotação</a>
+      <a href="#servicos" class="btn-ghost">Ver Serviços →</a>
+    </div>
+  </div>
+  <div class="hero-flags">
+    <div class="flag-chip active">🇧🇷 Brasil</div>
+    <div class="flag-chip">🇦🇷 Argentina</div>
+    <div class="flag-chip">🇨🇱 Chile</div>
+    <div class="flag-chip">🇵🇾 Paraguai</div>
+    <div class="flag-chip">🇺🇾 Uruguai</div>
+    <div class="flag-chip">🇧🇴 Bolívia</div>
+    <div class="flag-chip">🇵🇪 Peru</div>
+    <div class="flag-chip">🇻🇪 Venezuela</div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stat-card reveal">
+    <div class="stat-num" data-target="55430">0</div>
+    <div class="stat-label">Entregas Internacionais</div>
+  </div>
+  <div class="stat-card reveal" style="transition-delay:0.1s">
+    <div class="stat-num" data-target="20">0</div>
+    <div class="stat-label">Anos de Experiência</div>
+  </div>
+  <div class="stat-card reveal" style="transition-delay:0.2s">
+    <div class="stat-num" data-target="8000">0</div>
+    <div class="stat-label">Cidades Atendidas</div>
+  </div>
+  <div class="stat-card reveal" style="transition-delay:0.3s">
+    <div class="stat-num" data-target="10">0</div>
+    <div class="stat-label">Países Atendidos</div>
+  </div>
+</section>
+
+<!-- DESTINOS CARROSSEL -->
+<section id="paises">
+  <div style="overflow:hidden; padding: 0 48px; margin-bottom: 20px;">
+    <div class="section-header reveal">
+      <div class="section-tag">Destinos</div>
+      <h2 class="section-title">ONDE ATUAMOS</h2>
+    </div>
+  </div>
+  <div style="overflow:hidden; padding: 20px 0;">
+    <div class="countries-track">
+      <div class="country-pill"><span>🇧🇷</span> Brasil</div>
+      <div class="country-pill"><span>🇦🇷</span> Argentina</div>
+      <div class="country-pill"><span>🇨🇱</span> Chile</div>
+      <div class="country-pill"><span>🇵🇾</span> Paraguai</div>
+      <div class="country-pill"><span>🇺🇾</span> Uruguai</div>
+      <div class="country-pill"><span>🇧🇴</span> Bolívia</div>
+      <div class="country-pill"><span>🇵🇪</span> Peru</div>
+      <div class="country-pill"><span>🇻🇪</span> Venezuela</div>
+      <div class="country-pill"><span>🇧🇷</span> Brasil</div>
+      <div class="country-pill"><span>🇦🇷</span> Argentina</div>
+      <div class="country-pill"><span>🇨🇱</span> Chile</div>
+      <div class="country-pill"><span>🇵🇾</span> Paraguai</div>
+      <div class="country-pill"><span>🇺🇾</span> Uruguai</div>
+      <div class="country-pill"><span>🇧🇴</span> Bolívia</div>
+      <div class="country-pill"><span>🇵🇪</span> Peru</div>
+      <div class="country-pill"><span>🇻🇪</span> Venezuela</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVIÇOS -->
+<section id="servicos">
+  <div class="section-header reveal">
+    <div class="section-tag">O que fazemos</div>
+    <h2 class="section-title">NOSSOS SERVIÇOS</h2>
+    <p class="section-sub">Soluções completas para o transporte internacional de cargas, do planejamento à entrega.</p>
+  </div>
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab(this,'modal-transporte')">🚛 Transporte</button>
+    <button class="tab-btn" onclick="switchTab(this,'modal-cargas')">📦 Tipos de Carga</button>
+    <button class="tab-btn" onclick="switchTab(this,'modal-aduaneiro')">🏛️ Aduaneiro</button>
+  </div>
+
+  <div id="modal-transporte" class="tab-content active">
+    <div class="service-card reveal">
+      <div class="service-icon">🚛</div>
+      <h3>Terrestre</h3>
+      <p>Transporte rodoviário entre todos os países do Mercosul com rastreamento em tempo real e gestão completa da documentação.</p>
+    </div>
+    <div class="service-card reveal" style="transition-delay:0.1s">
+      <div class="service-icon">🔀</div>
+      <h3>Multimodal</h3>
+      <p>Combinação estratégica de diferentes modais de transporte para otimizar prazo, custo e segurança da sua carga.</p>
+    </div>
+    <div class="service-card reveal" style="transition-delay:0.2s">
+      <div class="service-icon">🚪</div>
+      <h3>Porta a Porta</h3>
+      <p>Serviço completo de coleta na origem e entrega no destino final, com acompanhamento dedicado em todo o processo.</p>
+    </div>
+  </div>
+
+  <div id="modal-cargas" class="tab-content">
+    <div class="service-card reveal">
+      <div class="service-icon">❄️</div>
+      <h3>Frigorificadas</h3>
+      <p>Transporte com controle rigoroso de temperatura para alimentos, farmacêuticos e produtos que exigem cadeia de frio.</p>
+    </div>
+    <div class="service-card reveal" style="transition-delay:0.1s">
+      <div class="service-icon">📦</div>
+      <h3>Secas em Geral</h3>
+      <p>Cargas paletizadas ou soltas, com soluções de consolidação para otimizar o custo do frete internacional.</p>
+    </div>
+    <div class="service-card reveal" style="transition-delay:0.2s">
+      <div class="service-icon">⚠️</div>
+      <h3>Químicas</h3>
+      <p>Produtos perigosos e não classificados transportados com toda a segurança exigida pela legislação internacional.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">🏗️</div>
+      <h3>Especiais</h3>
+      <p>Cargas com medidas e/ou pesos excedentes, com planejamento de rota e escolta quando necessário.</p>
+    </div>
+    <div class="service-card reveal" style="transition-delay:0.1s">
+      <div class="service-icon">🚢</div>
+      <h3>Conteinerizadas</h3>
+      <p>Movimentação de contêineres com integração portuária e gestão do booking internacional.</p>
+    </div>
+    <div class="service-card reveal" style="transition-delay:0.2s">
+      <div class="service-icon">🌾</div>
+      <h3>A Granel</h3>
+      <p>Cereais e outros sólidos a granel, com frotas especializadas e controle de qualidade no carregamento.</p>
+    </div>
+  </div>
+
+  <div id="modal-aduaneiro" class="tab-content">
+    <div class="service-card reveal">
+      <div class="service-icon">📋</div>
+      <h3>Trânsito Aduaneiro</h3>
+      <p>Gestão completa do trânsito aduaneiro com despacho eficiente nas fronteiras dos países do Mercosul.</p>
+    </div>
+    <div class="service-card reveal" style="transition-delay:0.1s">
+      <div class="service-icon">📄</div>
+      <h3>DTA de Passagem</h3>
+      <p>Declaração de Trânsito Aduaneiro processada com agilidade para garantir fluidez na passagem das fronteiras.</p>
+    </div>
+    <div class="service-card reveal" style="transition-delay:0.2s">
+      <div class="service-icon">🔍</div>
+      <h3>Assessoria Documental</h3>
+      <p>Orientação completa em documentação de exportação e importação, evitando atrasos e custos desnecessários.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section id="depoimentos">
+  <div class="section-header reveal">
+    <div class="section-tag">Clientes</div>
+    <h2 class="section-title">O QUE DIZEM SOBRE NÓS</h2>
+    <p class="section-sub">Parceiros que confiam na Loginter para suas operações internacionais.</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial reveal">
+      <div class="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="testimonial-text">A Loginter transformou nossa operação de importação. Prazo cumprido, documentação impecável e sempre com atualização em tempo real. Parceria que recomendo sem hesitar.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">RM</div>
+        <div>
+          <div class="author-name">Ricardo Motta</div>
+          <div class="author-company">Diretor Logístico · Metalúrgica Del Sur</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial reveal" style="transition-delay:0.1s">
+      <div class="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="testimonial-text">Trabalhamos com carga frigorificada para a Argentina e o Chile. A Loginter garante o controle de temperatura do início ao fim. Nunca tivemos uma não conformidade.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">CA</div>
+        <div>
+          <div class="author-name">Carla Alves</div>
+          <div class="author-company">Gerente de Suprimentos · FoodTrade Brasil</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial reveal" style="transition-delay:0.2s">
+      <div class="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="testimonial-text">Cinco anos de parceria e cada envio para o Paraguai e Uruguai é tratado com o mesmo profissionalismo. A equipe do Fernando é excepcional no que faz.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">JP</div>
+        <div>
+          <div class="author-name">Jorge Paiva</div>
+          <div class="author-company">CEO · Agroquímica Paiva & Filhos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section id="contato">
+  <div class="contact-grid">
+    <div class="contact-info reveal">
+      <div class="section-tag">Fale Conosco</div>
+      <h2>SOLICITE SUA<br><em style="background:linear-gradient(90deg,var(--orange),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal">COTAÇÃO</em></h2>
+      <p>Nossa equipe especializada responde em até 2 horas úteis. Informe os detalhes da sua carga e receberá uma proposta personalizada.</p>
+
+      <div class="contact-detail">
+        <div class="contact-detail-icon">📞</div>
+        <div>
+          <div class="contact-detail-label">Telefone / WhatsApp</div>
+          <div class="contact-detail-value">+55 (11) 94029-2467</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-detail-icon">✉️</div>
+        <div>
+          <div class="contact-detail-label">E-mail</div>
+          <div class="contact-detail-value">fernando@logintertransportes.com.br</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-detail-icon">🌐</div>
+        <div>
+          <div class="contact-detail-label">Especialidade</div>
+          <div class="contact-detail-value">Especialista Mercosul · 10+ países</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-form-wrap reveal" style="transition-delay:0.2s">
+      <h3>Envie sua mensagem</h3>
+      <p>Preencha os campos abaixo e entraremos em contato pelo canal de sua preferência.</p>
+
+      <div id="contact-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome completo</label>
+            <input type="text" id="f-nome" placeholder="Seu nome">
+          </div>
+          <div class="form-group">
+            <label>Empresa</label>
+            <input type="text" id="f-empresa" placeholder="Sua empresa">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="f-email" placeholder="seu@email.com">
+          </div>
+          <div class="form-group">
+            <label>WhatsApp</label>
+            <input type="tel" id="f-whatsapp" placeholder="+55 (11) 99999-9999">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Origem da carga</label>
+            <input type="text" id="f-origem" placeholder="Cidade / País">
+          </div>
+          <div class="form-group">
+            <label>Destino</label>
+            <input type="text" id="f-destino" placeholder="Cidade / País">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tipo de carga</label>
+          <select id="f-tipo">
+            <option value="">Selecione o tipo de carga</option>
+            <option>Frigorificada – Controle de temperatura</option>
+            <option>Seca em geral – Paletizada ou solta</option>
+            <option>Especial – Medidas/pesos excedentes</option>
+            <option>Conteinerizada</option>
+            <option>A granel – Cereais/sólidos</option>
+            <option>Química – Perigosa ou não classificada</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mensagem / Detalhes</label>
+          <textarea id="f-mensagem" placeholder="Descreva sua necessidade: peso, volume, urgência, frequência de envios…"></textarea>
+        </div>
+        <div class="form-channels">
+          <label class="channel-check"><input type="checkbox" id="ch-email" checked> 📧 Resposta por e-mail</label>
+          <label class="channel-check"><input type="checkbox" id="ch-wa" checked> 💬 Cópia no WhatsApp</label>
+        </div>
+        <button class="btn-primary" onclick="enviarFormulario()" style="width:100%;border:none;font-family:'Outfit',sans-serif;font-size:15px;">
+          🚀 Solicitar Cotação Agora
+        </button>
+      </div>
+
+      <div class="form-success" id="form-success">
+        <div class="success-icon">✅</div>
+        <h4>Mensagem enviada!</h4>
+        <p>Recebemos sua solicitação. Nossa equipe retornará <strong>em até 2 horas úteis</strong>.<br>Verifique também seu WhatsApp para a cópia da mensagem.</p>
+        <br>
+        <button class="btn-ghost" onclick="resetForm()" style="border:none;cursor:pointer;font-family:'Outfit',sans-serif">Enviar outra mensagem</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo">
+        <div class="nav-logo-icon" style="width:40px;height:40px;font-size:18px">🐆</div>
+        <div>
+          <div class="nav-logo-text">LOGINTER</div>
+          <div class="nav-logo-sub">Transportes Internacionais</div>
+        </div>
+      </div>
+      <p>Conectando o Brasil à América do Sul há mais de 20 anos. Especialistas em frete internacional terrestre, multimodal e transporte de cargas especiais.</p>
+      <div class="mercosul-badge" style="margin-top:20px">⭐ MERCOSUL Especialista</div>
+    </div>
+    <div class="footer-col">
+      <h4>Serviços</h4>
+      <ul>
+        <li><a href="#">Terrestre</a></li>
+        <li><a href="#">Multimodal</a></li>
+        <li><a href="#">Porta a Porta</a></li>
+        <li><a href="#">Trânsito Aduaneiro</a></li>
+        <li><a href="#">DTA de Passagem</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contato</h4>
+      <ul>
+        <li><a href="tel:+5511940292467">📞 (11) 94029-2467</a></li>
+        <li><a href="mailto:fernando@logintertransportes.com.br">✉️ fernando@logintertransportes.com.br</a></li>
+        <li><a href="https://wa.me/5511940292467">💬 WhatsApp</a></li>
+      </ul>
+      <div style="margin-top:24px">
+        <h4>Contato</h4>
+        <p style="font-size:14px;color:var(--muted)">Fernando Bilhalba</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2025 Loginter Transportes Internacionais. Todos os direitos reservados.</div>
+    <div style="display:flex;gap:16px">
+      <a href="#" style="color:var(--muted);text-decoration:none;font-size:13px">Política de Privacidade</a>
+      <a href="#" style="color:var(--muted);text-decoration:none;font-size:13px">Termos de Uso</a>
+    </div>
+  </div>
+</footer>
+
+<!-- WHATSAPP FLOAT -->
+<div class="wa-float">
+  <div class="wa-tooltip">💬 Fale com Fernando · (11) 94029-2467</div>
+  <a class="wa-btn" href="https://wa.me/5511940292467?text=Olá%20Fernando%2C%20gostaria%20de%20uma%20cotação%20de%20frete%20internacional!" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+    </svg>
+  </a>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal" onclick="closeModalOutside(event)">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <!-- VIEW: LOGIN -->
+    <div class="modal-view active" id="view-login">
+      <div class="modal-logo">
+        <div class="modal-logo-icon">🐆</div>
+        <p>LOGINTER</p>
+        <small>Área Administrativa</small>
+      </div>
+      <h2>Acesso Restrito</h2>
+      <p class="modal-sub">Esta área é exclusiva para administradores autorizados.</p>
+
+      <button class="social-btn" onclick="googleLogin()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Entrar com Google
+      </button>
+
+      <div class="divider"><span>ou use suas credenciais</span></div>
+
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="login-email" placeholder="admin@logintertransportes.com.br">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="login-pass" placeholder="••••••••">
+      </div>
+      <div class="forgot-row">
+        <button class="modal-link" onclick="showView('view-forgot')">Esqueci minha senha</button>
+      </div>
+
+      <button class="btn-primary" onclick="doLogin()">Entrar na Plataforma</button>
+      <div class="modal-footer">
+        <div class="admin-badge">🔒 Acesso exclusivo para administradores</div>
+      </div>
+    </div>
+
+    <!-- VIEW: FORGOT PASSWORD -->
+    <div class="modal-view" id="view-forgot">
+      <div class="modal-logo">
+        <div class="modal-logo-icon">🔑</div>
+        <p>LOGINTER</p>
+        <small>Recuperar Acesso</small>
+      </div>
+      <h2>Recuperar Senha</h2>
+      <p class="modal-sub">Insira seu e-mail cadastrado e enviaremos as instruções de redefinição.</p>
+
+      <div class="form-group">
+        <label>E-mail cadastrado</label>
+        <input type="email" id="forgot-email" placeholder="admin@logintertransportes.com.br">
+      </div>
+
+      <button class="btn-primary" onclick="doForgot()">Enviar Instruções</button>
+      <div class="modal-footer">
+        <button class="modal-link" onclick="showView('view-login')">← Voltar para o login</button>
+      </div>
+    </div>
+
+    <!-- VIEW: EMAIL SENT -->
+    <div class="modal-view" id="view-sent">
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:60px;margin-bottom:20px">📬</div>
+        <h2 style="margin-bottom:12px">E-mail enviado!</h2>
+        <p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:28px">Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
+        <button class="btn-ghost" onclick="showView('view-login')" style="border:none;cursor:pointer;font-family:'Outfit',sans-serif;background:var(--glass);border:1px solid var(--glass-border)">← Voltar para o login</button>
+      </div>
+    </div>
+
+    <!-- VIEW: DASHBOARD (mock) -->
+    <div class="modal-view" id="view-dashboard">
+      <div style="text-align:center;padding:10px 0 24px">
+        <div style="font-size:48px;margin-bottom:12px">✅</div>
+        <h2 style="margin-bottom:6px">Bem-vindo!</h2>
+        <p style="color:var(--muted);font-size:14px">Acesso administrativo autorizado.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);border-radius:12px;padding:20px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--amber)">12</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Cotações Pendentes</div>
+        </div>
+        <div style="background:rgba(37,211,102,0.08);border:1px solid rgba(37,211,102,0.2);border-radius:12px;padding:20px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#25D366">38</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Em Trânsito</div>
+        </div>
+      </div>
+      <button class="btn-ghost" onclick="closeModal()" style="width:100%;text-align:center;border:1px solid var(--glass-border);background:var(--glass);cursor:pointer;font-family:'Outfit',sans-serif">Fechar painel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── TAB SWITCH ──
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ── MODAL ──
+function openModal() { document.getElementById('loginModal').classList.add('open'); }
+function closeModal() { document.getElementById('loginModal').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target.id === 'loginModal') closeModal(); }
+function showView(id) {
+  document.querySelectorAll('.modal-view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) { alert('Preencha e-mail e senha.'); return; }
+  showView('view-dashboard');
+}
+function googleLogin() { showView('view-dashboard'); }
+function doForgot() {
+  const email = document.getElementById('forgot-email').value;
+  if (!email) { alert('Insira seu e-mail.'); return; }
+  showView('view-sent');
+}
+
+// ── FORM SUBMIT ──
+function enviarFormulario() {
+  const nome = document.getElementById('f-nome').value;
+  const email = document.getElementById('f-email').value;
+  const wa = document.getElementById('f-whatsapp').value;
+  const msg = document.getElementById('f-mensagem').value;
+  if (!nome || !email || !msg) { alert('Preencha nome, e-mail e mensagem.'); return; }
+
+  const chWa = document.getElementById('ch-wa').checked;
+  const tipo = document.getElementById('f-tipo').value;
+  const empresa = document.getElementById('f-empresa').value;
+  const origem = document.getElementById('f-origem').value;
+  const destino = document.getElementById('f-destino').value;
+
+  // WhatsApp redirect if opted in
+  if (chWa && wa) {
+    const waText = encodeURIComponent(
+      `*Nova Solicitação – Loginter*\n\n` +
+      `👤 *Nome:* ${nome}\n` +
+      `🏢 *Empresa:* ${empresa || '–'}\n` +
+      `📧 *E-mail:* ${email}\n` +
+      `📦 *Carga:* ${tipo || '–'}\n` +
+      `📍 *Rota:* ${origem || '–'} → ${destino || '–'}\n\n` +
+      `💬 *Mensagem:*\n${msg}`
+    );
+    window.open(`https://wa.me/5511940292467?text=${waText}`, '_blank');
+  }
+
+  document.getElementById('contact-form').style.display = 'none';
+  document.getElementById('form-success').style.display = 'block';
+}
+function resetForm() {
+  document.getElementById('contact-form').style.display = 'block';
+  document.getElementById('form-success').style.display = 'none';
+  document.querySelectorAll('#contact-form input, #contact-form select, #contact-form textarea')
+    .forEach(el => el.value = '');
+}
+
+// ── COUNTER ANIMATION ──
+function animateCounter(el, target) {
+  let start = 0;
+  const suffix = target >= 1000 ? '+' : (target === 20 ? '+' : '+');
+  const duration = 1800;
+  const step = (timestamp) => {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString('pt-BR') + suffix;
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// ── REVEAL ON SCROLL ──
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      // Counter animation
+      const num = entry.target.querySelector('[data-target]');
+      if (num && !num.dataset.animated) {
+        num.dataset.animated = 'true';
+        animateCounter(num, parseInt(num.dataset.target));
+      }
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(r => observer.observe(r));
+
+// Also observe stat cards for counters
+document.querySelectorAll('.stat-card').forEach(card => observer.observe(card));
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
